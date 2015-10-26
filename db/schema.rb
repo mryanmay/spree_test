@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151025071522) do
+ActiveRecord::Schema.define(version: 20151026204624) do
 
   create_table "friendly_id_slugs", force: :cascade do |t|
     t.string   "slug",           limit: 255, null: false
@@ -336,9 +336,12 @@ ActiveRecord::Schema.define(version: 20151025071522) do
     t.string   "number",               limit: 255
     t.string   "cvv_response_code",    limit: 255
     t.string   "cvv_response_message", limit: 255
+    t.integer  "payable_id",           limit: 4
+    t.string   "payable_type",         limit: 255
   end
 
   add_index "spree_payments", ["order_id"], name: "index_spree_payments_on_order_id", using: :btree
+  add_index "spree_payments", ["payable_id", "payable_type"], name: "index_spree_payments_on_payable_id_and_payable_type", using: :btree
   add_index "spree_payments", ["payment_method_id"], name: "index_spree_payments_on_payment_method_id", using: :btree
   add_index "spree_payments", ["source_id", "source_type"], name: "index_spree_payments_on_source_id_and_source_type", using: :btree
 
@@ -641,6 +644,7 @@ ActiveRecord::Schema.define(version: 20151025071522) do
     t.decimal  "promo_total",                      precision: 10, scale: 2, default: 0.0
     t.decimal  "included_tax_total",               precision: 10, scale: 2, default: 0.0, null: false
     t.decimal  "pre_tax_amount",                   precision: 12, scale: 4, default: 0.0, null: false
+    t.decimal  "supplier_commission",              precision: 8,  scale: 2, default: 0.0, null: false
   end
 
   add_index "spree_shipments", ["address_id"], name: "index_spree_shipments_on_address_id", using: :btree
@@ -765,6 +769,7 @@ ActiveRecord::Schema.define(version: 20151025071522) do
     t.boolean  "backorderable_default",              default: false
     t.boolean  "propagate_all_variants",             default: true
     t.string   "admin_name",             limit: 255
+    t.integer  "supplier_id",            limit: 4
   end
 
   add_index "spree_stock_locations", ["active"], name: "index_spree_stock_locations_on_active", using: :btree
@@ -772,6 +777,7 @@ ActiveRecord::Schema.define(version: 20151025071522) do
   add_index "spree_stock_locations", ["country_id"], name: "index_spree_stock_locations_on_country_id", using: :btree
   add_index "spree_stock_locations", ["propagate_all_variants"], name: "index_spree_stock_locations_on_propagate_all_variants", using: :btree
   add_index "spree_stock_locations", ["state_id"], name: "index_spree_stock_locations_on_state_id", using: :btree
+  add_index "spree_stock_locations", ["supplier_id"], name: "index_spree_stock_locations_on_supplier_id", using: :btree
 
   create_table "spree_stock_movements", force: :cascade do |t|
     t.integer  "stock_item_id",   limit: 4
@@ -816,6 +822,39 @@ ActiveRecord::Schema.define(version: 20151025071522) do
   add_index "spree_stores", ["code"], name: "index_spree_stores_on_code", using: :btree
   add_index "spree_stores", ["default"], name: "index_spree_stores_on_default", using: :btree
   add_index "spree_stores", ["url"], name: "index_spree_stores_on_url", using: :btree
+
+  create_table "spree_supplier_variants", force: :cascade do |t|
+    t.integer  "supplier_id", limit: 4
+    t.integer  "variant_id",  limit: 4
+    t.decimal  "cost",                  precision: 10
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "spree_supplier_variants", ["supplier_id"], name: "index_spree_supplier_variants_on_supplier_id", using: :btree
+  add_index "spree_supplier_variants", ["variant_id"], name: "index_spree_supplier_variants_on_variant_id", using: :btree
+
+  create_table "spree_suppliers", force: :cascade do |t|
+    t.boolean  "active",                                                    default: false, null: false
+    t.integer  "address_id",            limit: 4
+    t.decimal  "commission_flat_rate",              precision: 8, scale: 2, default: 0.0,   null: false
+    t.float    "commission_percentage", limit: 24,                          default: 0.0,   null: false
+    t.string   "email",                 limit: 255
+    t.string   "name",                  limit: 255
+    t.string   "url",                   limit: 255
+    t.datetime "deleted_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "tax_id",                limit: 255
+    t.string   "token",                 limit: 255
+    t.string   "slug",                  limit: 255
+  end
+
+  add_index "spree_suppliers", ["active"], name: "index_spree_suppliers_on_active", using: :btree
+  add_index "spree_suppliers", ["address_id"], name: "index_spree_suppliers_on_address_id", using: :btree
+  add_index "spree_suppliers", ["deleted_at"], name: "index_spree_suppliers_on_deleted_at", using: :btree
+  add_index "spree_suppliers", ["slug"], name: "index_spree_suppliers_on_slug", unique: true, using: :btree
+  add_index "spree_suppliers", ["token"], name: "index_spree_suppliers_on_token", using: :btree
 
   create_table "spree_tax_categories", force: :cascade do |t|
     t.string   "name",        limit: 255
@@ -938,11 +977,13 @@ ActiveRecord::Schema.define(version: 20151025071522) do
     t.string   "confirmation_token",     limit: 255
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
+    t.integer  "supplier_id",            limit: 4
   end
 
   add_index "spree_users", ["deleted_at"], name: "index_spree_users_on_deleted_at", using: :btree
   add_index "spree_users", ["email"], name: "email_idx_unique", unique: true, using: :btree
   add_index "spree_users", ["spree_api_key"], name: "index_spree_users_on_spree_api_key", using: :btree
+  add_index "spree_users", ["supplier_id"], name: "index_spree_users_on_supplier_id", using: :btree
 
   create_table "spree_variants", force: :cascade do |t|
     t.string   "sku",               limit: 255,                          default: "",    null: false
