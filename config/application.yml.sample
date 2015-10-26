@@ -1,0 +1,2 @@
+defaults: &defaults
+  devise_secret: 595e3e5b9abd9fee8b41a7a8dfb37b42693c88f6bfea77f15d75d8a2e4f0d9e5b789855340edfc32cb9864658c023e3dc13ba15f4258a849bb5008e2b5aa99e0

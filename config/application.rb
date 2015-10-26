@@ -8,6 +8,12 @@ Bundler.require(*Rails.groups)
 
 module Liveshops
   class Application < Rails::Application
+
+    config.before_configuration do
+      erb = IO.read(File.join(Rails.root, 'config', 'application.yml'))
+      result = ERB.new(erb).result
+      ::APP_CONFIG = YAML.load(result)[Rails.env].with_indifferent_access
+    end
     
     config.to_prepare do
       # Load application's model / class decorators

@@ -1,12 +1,4 @@
 GIT
-  remote: git://github.com/capistrano/rvm.git
-  revision: 9cfef39cf0022839dca6b5b330dfefeb5fc363e7
-  specs:
-    capistrano-rvm (0.1.2)
-      capistrano (~> 3.0)
-      sshkit (~> 1.2)
-
-GIT
   remote: git://github.com/spree/spree_auth_devise.git
   revision: 7b24ad16239367dc15f96a80cc2a954a822cc6af
   branch: 3-0-stable
@@ -100,6 +92,9 @@ GEM
     capistrano-rails (1.1.5)
       capistrano (~> 3.1)
       capistrano-bundler (~> 1.1)
+    capistrano-rvm (0.1.2)
+      capistrano (~> 3.0)
+      sshkit (~> 1.2)
     carmen (1.0.2)
       activesupport (>= 3.0.0)
     cldr-plurals-runtime-rb (1.0.1)
@@ -359,7 +354,7 @@ DEPENDENCIES
   capistrano (~> 3.4.0)
   capistrano-bundler (~> 1.1.2)
   capistrano-rails
-  capistrano-rvm!
+  capistrano-rvm
   coffee-rails (~> 4.1.0)
   jbuilder (~> 2.0)
   jquery-rails
